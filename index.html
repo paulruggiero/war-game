@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -46,6 +46,112 @@
 
     <section class="log-section">
       <h2>Battle Log</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <script src="logic.js"></script>
+  <script src="game.js"></script>
+</body>
+</html> -->
+<!-- previous written code, just in case new one is shit -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>War Game Prototype</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Prototype Build</p>
+        <h1>War Game</h1>
+      </div>
+      <div class="run-status">
+        <span id="statusBadge" class="status-badge">Run Active</span>
+      </div>
+    </header>
+
+    <section class="stats panel">
+      <div class="stat-card"><span class="stat-label">Ante</span><span id="ante" class="stat-value">1</span></div>
+      <div class="stat-card"><span class="stat-label">Coins</span><span id="coins" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">War Slots</span><span id="warSlots" class="stat-value">3</span></div>
+      <div class="stat-card"><span class="stat-label">Draw Pile</span><span id="drawPile" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Discard</span><span id="discardPile" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Destroyed</span><span id="destroyed" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Lost</span><span id="lost" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Loot Stash</span><span id="lootStash" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Deck Size</span><span id="deckSize" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Battles</span><span id="battleCount" class="stat-value">0</span></div>
+    </section>
+
+    <section class="table-layout">
+      <section class="battle-area panel">
+        <div class="card-zone opponent-zone">
+          <p class="zone-label">Opponent</p>
+          <div id="opponentCard" class="card back">?</div>
+          <div id="opponentRank" class="rank-text">-</div>
+        </div>
+
+        <div class="center-area">
+          <div id="resultText" class="result-text">Press Flip Battle to begin</div>
+          <div class="buttons">
+            <button id="flipBtn" class="primary-btn">Flip Battle</button>
+            <button id="shopBtn">Open Shop</button>
+            <button id="resetBtn" class="ghost-btn">Reset Run</button>
+          </div>
+        </div>
+
+        <div class="card-zone player-zone">
+          <p class="zone-label">You</p>
+          <div id="playerCard" class="card back">?</div>
+          <div id="playerRank" class="rank-text">-</div>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel deck-panel">
+          <div class="panel-header">
+            <h2>Deck</h2>
+            <span id="deckSummary" class="muted">20 cards</span>
+          </div>
+          <div id="deckList" class="deck-list"></div>
+        </section>
+
+        <section class="panel shop-panel">
+          <div class="panel-header">
+            <h2>Shop</h2>
+            <span class="muted">Spend coins with control</span>
+          </div>
+          <div class="shop-controls">
+            <button id="refreshShopBtn">Refresh Offers</button>
+          </div>
+          <div id="shopOffers" class="shop-offers"></div>
+          <div class="shop-actions">
+            <button id="warSlotBtn">Buy War Slot (+1) — 10</button>
+          </div>
+          <div class="panel-header sub-header">
+            <h3>Destroy a card</h3>
+            <span class="muted">Trim weak cards</span>
+          </div>
+          <div id="destroyList" class="destroy-list"></div>
+          <div class="panel-header sub-header">
+            <h3>Loot Stash</h3>
+            <span class="muted">Add captured cards to deck</span>
+          </div>
+          <div id="lootList" class="loot-list"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="log-section panel">
+      <div class="panel-header">
+        <h2>Battle Log</h2>
+      </div>
       <div id="log" class="log"></div>
     </section>
   </main>
