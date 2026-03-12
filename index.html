@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>War Game Prototype</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>War Game Prototype</h1>
+
+    <section class="stats">
+      <div>Ante: <span id="ante">1</span></div>
+      <div>Coins: <span id="coins">0</span></div>
+      <div>War Slots: <span id="warSlots">3</span></div>
+      <div>Draw Pile: <span id="drawPile">0</span></div>
+      <div>Discard Pile: <span id="discardPile">0</span></div>
+      <div>Destroyed: <span id="destroyed">0</span></div>
+      <div>Lost: <span id="lost">0</span></div>
+      <div>Loot Stash: <span id="lootStash">0</span></div>
+    </section>
+
+    <section class="battle-area">
+      <div class="card-zone">
+        <h2>Opponent</h2>
+        <div id="opponentCard" class="card back">?</div>
+        <div id="opponentRank" class="rank-text">-</div>
+      </div>
+
+      <div class="center-area">
+        <div id="resultText" class="result-text">Press Flip Battle to begin</div>
+        <div class="buttons">
+          <button id="flipBtn">Flip Battle</button>
+          <button id="shopBtn">Go To Shop</button>
+          <button id="resetBtn">Reset Run</button>
+        </div>
+      </div>
+
+      <div class="card-zone">
+        <h2>You</h2>
+        <div id="playerCard" class="card back">?</div>
+        <div id="playerRank" class="rank-text">-</div>
+      </div>
+    </section>
+
+    <section class="log-section">
+      <h2>Battle Log</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <script src="logic.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
