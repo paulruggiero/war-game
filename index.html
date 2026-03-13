@@ -68,7 +68,7 @@
   <main class="app">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Prototype Build</p>
+        <p class="eyebrow">Desktop Prototype</p>
         <h1>War Game</h1>
       </div>
       <div class="run-status">
@@ -77,16 +77,16 @@
     </header>
 
     <section class="stats panel">
-      <div class="stat-card"><span class="stat-label">Ante</span><span id="ante" class="stat-value">1</span></div>
+      <div class="stat-card"><span class="stat-label">Battle</span><span id="battleNumber" class="stat-value">1</span></div>
       <div class="stat-card"><span class="stat-label">Coins</span><span id="coins" class="stat-value">0</span></div>
       <div class="stat-card"><span class="stat-label">War Slots</span><span id="warSlots" class="stat-value">3</span></div>
-      <div class="stat-card"><span class="stat-label">Draw Pile</span><span id="drawPile" class="stat-value">0</span></div>
-      <div class="stat-card"><span class="stat-label">Discard</span><span id="discardPile" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Round</span><span id="roundNumber" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Your Cards</span><span id="playerBattleCards" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Enemy Cards</span><span id="opponentBattleCards" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Run Deck</span><span id="runDeckSize" class="stat-value">0</span></div>
       <div class="stat-card"><span class="stat-label">Destroyed</span><span id="destroyed" class="stat-value">0</span></div>
-      <div class="stat-card"><span class="stat-label">Lost</span><span id="lost" class="stat-value">0</span></div>
-      <div class="stat-card"><span class="stat-label">Loot Stash</span><span id="lootStash" class="stat-value">0</span></div>
-      <div class="stat-card"><span class="stat-label">Deck Size</span><span id="deckSize" class="stat-value">0</span></div>
-      <div class="stat-card"><span class="stat-label">Battles</span><span id="battleCount" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Battle Wins</span><span id="battleWins" class="stat-value">0</span></div>
+      <div class="stat-card"><span class="stat-label">Shop Status</span><span id="shopStatus" class="stat-value small">Closed</span></div>
     </section>
 
     <section class="table-layout">
@@ -98,11 +98,16 @@
         </div>
 
         <div class="center-area">
-          <div id="resultText" class="result-text">Press Flip Battle to begin</div>
+          <div id="resultText" class="result-text">Press Play Round to begin battle 1</div>
           <div class="buttons">
-            <button id="flipBtn" class="primary-btn">Flip Battle</button>
-            <button id="shopBtn">Open Shop</button>
+            <button id="playRoundBtn" class="primary-btn">Play Round</button>
+            <button id="openShopBtn">Open Shop</button>
+            <button id="nextBattleBtn">Start Next Battle</button>
             <button id="resetBtn" class="ghost-btn">Reset Run</button>
+          </div>
+          <div class="battle-summary">
+            <p><strong>Battle Summary</strong></p>
+            <p id="battleSummaryText">Win rounds to steal enemy cards. Win the whole battle to reach the shop.</p>
           </div>
         </div>
 
@@ -116,7 +121,7 @@
       <aside class="sidebar">
         <section class="panel deck-panel">
           <div class="panel-header">
-            <h2>Deck</h2>
+            <h2>Run Deck</h2>
             <span id="deckSummary" class="muted">20 cards</span>
           </div>
           <div id="deckList" class="deck-list"></div>
@@ -125,10 +130,10 @@
         <section class="panel shop-panel">
           <div class="panel-header">
             <h2>Shop</h2>
-            <span class="muted">Spend coins with control</span>
+            <span class="muted">Only after battle wins</span>
           </div>
           <div class="shop-controls">
-            <button id="refreshShopBtn">Refresh Offers</button>
+            <button id="refreshShopBtn">Refresh Offers (-2)</button>
           </div>
           <div id="shopOffers" class="shop-offers"></div>
           <div class="shop-actions">
@@ -139,11 +144,6 @@
             <span class="muted">Trim weak cards</span>
           </div>
           <div id="destroyList" class="destroy-list"></div>
-          <div class="panel-header sub-header">
-            <h3>Loot Stash</h3>
-            <span class="muted">Add captured cards to deck</span>
-          </div>
-          <div id="lootList" class="loot-list"></div>
         </section>
       </aside>
     </section>

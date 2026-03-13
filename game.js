@@ -1,16 +1,16 @@
 let state = createState();
-refreshShopOffers(state);
+startBattle(state);
 
-const anteEl = document.getElementById("ante");
+const battleNumberEl = document.getElementById("battleNumber");
 const coinsEl = document.getElementById("coins");
 const warSlotsEl = document.getElementById("warSlots");
-const drawPileEl = document.getElementById("drawPile");
-const discardPileEl = document.getElementById("discardPile");
+const roundNumberEl = document.getElementById("roundNumber");
+const playerBattleCardsEl = document.getElementById("playerBattleCards");
+const opponentBattleCardsEl = document.getElementById("opponentBattleCards");
+const runDeckSizeEl = document.getElementById("runDeckSize");
 const destroyedEl = document.getElementById("destroyed");
-const lostEl = document.getElementById("lost");
-const lootStashEl = document.getElementById("lootStash");
-const deckSizeEl = document.getElementById("deckSize");
-const battleCountEl = document.getElementById("battleCount");
+const battleWinsEl = document.getElementById("battleWins");
+const shopStatusEl = document.getElementById("shopStatus");
 const statusBadgeEl = document.getElementById("statusBadge");
 const deckSummaryEl = document.getElementById("deckSummary");
 
@@ -19,38 +19,25 @@ const opponentCardEl = document.getElementById("opponentCard");
 const playerRankEl = document.getElementById("playerRank");
 const opponentRankEl = document.getElementById("opponentRank");
 const resultTextEl = document.getElementById("resultText");
+const battleSummaryTextEl = document.getElementById("battleSummaryText");
 const logEl = document.getElementById("log");
 
 const deckListEl = document.getElementById("deckList");
 const shopOffersEl = document.getElementById("shopOffers");
 const destroyListEl = document.getElementById("destroyList");
-const lootListEl = document.getElementById("lootList");
 
-const flipBtn = document.getElementById("flipBtn");
-const shopBtn = document.getElementById("shopBtn");
+const playRoundBtn = document.getElementById("playRoundBtn");
+const openShopBtn = document.getElementById("openShopBtn");
+const nextBattleBtn = document.getElementById("nextBattleBtn");
 const resetBtn = document.getElementById("resetBtn");
 const refreshShopBtn = document.getElementById("refreshShopBtn");
 const warSlotBtn = document.getElementById("warSlotBtn");
 
-function updateStats() {
-  anteEl.textContent = state.ante;
-  coinsEl.textContent = state.coins;
-  warSlotsEl.textContent = state.warSlots;
-  drawPileEl.textContent = state.drawPile.length;
-  discardPileEl.textContent = state.discardPile.length;
-  destroyedEl.textContent = state.destroyed.length;
-  lostEl.textContent = state.lost.length;
-  lootStashEl.textContent = state.lootStash.length;
-  deckSizeEl.textContent = deckSize(state);
-  battleCountEl.textContent = state.battleCount;
-  deckSummaryEl.textContent = `${deckSize(state)} cards`;
-  statusBadgeEl.textContent = state.gameOver ? "Run Over" : "Run Active";
-  statusBadgeEl.classList.toggle("result-loss", state.gameOver);
-  statusBadgeEl.classList.toggle("result-win", !state.gameOver);
-
-  warSlotBtn.disabled = state.gameOver || state.coins < WAR_SLOT_COST || state.warSlots >= WAR_SLOTS_CAP;
-  refreshShopBtn.disabled = state.gameOver || (state.shopOffers.length > 0 && state.coins < SHOP_REFRESH_COST);
-  flipBtn.disabled = state.gameOver;
+function addLog(message) {
+  const line = document.createElement("div");
+  line.className = "log-entry";
+  line.textContent = message;
+  logEl.prepend(line);
 }
 
 function renderCard(element, card) {
@@ -59,16 +46,8 @@ function renderCard(element, card) {
     element.classList.add("back");
     return;
   }
-
   element.textContent = cardLabel(card);
   element.classList.remove("back");
-}
-
-function addLog(message) {
-  const line = document.createElement("div");
-  line.className = "log-entry";
-  line.textContent = message;
-  logEl.prepend(line);
 }
 
 function resetBoardCards() {
@@ -80,10 +59,33 @@ function resetBoardCards() {
   opponentRankEl.textContent = "-";
 }
 
+function updateStats() {
+  battleNumberEl.textContent = state.battleNumber;
+  coinsEl.textContent = state.coins;
+  warSlotsEl.textContent = state.warSlots;
+  roundNumberEl.textContent = state.battle ? state.battle.roundNumber : 0;
+  playerBattleCardsEl.textContent = state.battle ? totalBattleCards(state.battle, "player") : 0;
+  opponentBattleCardsEl.textContent = state.battle ? totalBattleCards(state.battle, "opponent") : 0;
+  runDeckSizeEl.textContent = runDeckSize(state);
+  destroyedEl.textContent = state.destroyed.length;
+  battleWinsEl.textContent = state.battleWins;
+  shopStatusEl.textContent = state.shopOpen ? "Open" : "Closed";
+  deckSummaryEl.textContent = `${runDeckSize(state)} cards`;
+  statusBadgeEl.textContent = state.gameOver ? "Run Over" : state.shopOpen ? "Shop Open" : "Battle Active";
+  statusBadgeEl.classList.toggle("result-loss", state.gameOver);
+  statusBadgeEl.classList.toggle("result-win", !state.gameOver);
+
+  playRoundBtn.disabled = state.gameOver || !state.battle || state.battle.over || state.shopOpen;
+  openShopBtn.disabled = !state.shopOpen;
+  nextBattleBtn.disabled = !state.readyForNextBattle || state.gameOver;
+  refreshShopBtn.disabled = !state.shopOpen || (state.shopOffers.length > 0 && state.coins < SHOP_REFRESH_COST);
+  warSlotBtn.disabled = !state.shopOpen || state.coins < WAR_SLOT_COST || state.warSlots >= WAR_SLOTS_CAP;
+}
+
 function renderDeckList() {
   deckListEl.innerHTML = "";
-  const cards = allDeckCards(state)
-    .map(card => ({ card, label: cardLabel(card), desc: cardDescription(card) }))
+  const cards = allRunDeckCards(state)
+    .map((card) => ({ card, label: cardLabel(card), desc: cardDescription(card) }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
   for (const item of cards) {
@@ -97,6 +99,14 @@ function renderDeckList() {
 function renderShopOffers() {
   shopOffersEl.innerHTML = "";
 
+  if (!state.shopOpen) {
+    const closed = document.createElement("div");
+    closed.className = "mini-card";
+    closed.innerHTML = `<div><strong>Shop closed</strong><small>Win the current battle to buy upgrades.</small></div>`;
+    shopOffersEl.appendChild(closed);
+    return;
+  }
+
   if (!state.shopOffers.length) {
     const empty = document.createElement("div");
     empty.className = "mini-card";
@@ -108,13 +118,13 @@ function renderShopOffers() {
   state.shopOffers.forEach((offer, index) => {
     const div = document.createElement("div");
     div.className = "mini-card";
-    const buttonDisabled = state.gameOver || state.coins < SPECIAL_COST || deckSize(state) >= DECK_CAP;
+    const disabled = state.coins < SPECIAL_COST || runDeckSize(state) >= DECK_CAP;
     div.innerHTML = `
       <div>
         <strong>${offer.name}</strong>
         <small>${offer.text}</small>
       </div>
-      <button data-offer-index="${index}" ${buttonDisabled ? "disabled" : ""}>Buy (${SPECIAL_COST})</button>
+      <button data-offer-index="${index}" ${disabled ? "disabled" : ""}>Buy (${SPECIAL_COST})</button>
     `;
     shopOffersEl.appendChild(div);
   });
@@ -122,8 +132,17 @@ function renderShopOffers() {
 
 function renderDestroyList() {
   destroyListEl.innerHTML = "";
-  const cards = allDeckCards(state)
-    .filter(card => card.kind === "std")
+
+  if (!state.shopOpen) {
+    const closed = document.createElement("div");
+    closed.className = "mini-card";
+    closed.innerHTML = `<div><strong>Destroy locked</strong><small>Available only in the shop.</small></div>`;
+    destroyListEl.appendChild(closed);
+    return;
+  }
+
+  const cards = allRunDeckCards(state)
+    .filter((card) => card.kind === "std")
     .sort((a, b) => a.r - b.r)
     .slice(0, 8);
 
@@ -135,11 +154,11 @@ function renderDestroyList() {
     return;
   }
 
-  cards.forEach(card => {
+  cards.forEach((card) => {
     const div = document.createElement("div");
     div.className = "mini-card";
     const id = getCardId(card);
-    const disabled = state.gameOver || state.coins < DESTROY_COST;
+    const disabled = state.coins < DESTROY_COST;
     div.innerHTML = `
       <div>
         <strong>${cardLabel(card)}</strong>
@@ -151,46 +170,20 @@ function renderDestroyList() {
   });
 }
 
-function renderLootList() {
-  lootListEl.innerHTML = "";
-
-  if (!state.lootStash.length) {
-    const empty = document.createElement("div");
-    empty.className = "mini-card";
-    empty.innerHTML = `<div><strong>No loot yet</strong><small>Win a WAR to capture cards.</small></div>`;
-    lootListEl.appendChild(empty);
-    return;
-  }
-
-  state.lootStash.forEach((card, index) => {
-    const div = document.createElement("div");
-    div.className = "mini-card";
-    const disabled = state.gameOver || deckSize(state) >= DECK_CAP;
-    div.innerHTML = `
-      <div>
-        <strong>${cardLabel(card)}</strong>
-        <small>${cardDescription(card)}</small>
-      </div>
-      <button data-loot-index="${index}" ${disabled ? "disabled" : ""}>Add</button>
-    `;
-    lootListEl.appendChild(div);
-  });
-}
-
 function renderAll() {
   updateStats();
   renderDeckList();
   renderShopOffers();
   renderDestroyList();
-  renderLootList();
 }
 
-function handleBattle() {
-  const result = playBattle(state);
+function handleRound() {
+  const result = playRound(state);
 
   if (result.ended) {
-    resultTextEl.textContent = `Ended: ${result.reason}`;
-    addLog(`Ended: ${result.reason}`);
+    resultTextEl.textContent = result.reason;
+    battleSummaryTextEl.textContent = result.reason;
+    addLog(result.reason);
     renderAll();
     return;
   }
@@ -203,61 +196,70 @@ function handleBattle() {
   if (result.war && result.win) {
     resultTextEl.textContent = "WAR WIN";
     resultTextEl.className = "result-text result-win";
-    addLog(`WAR WIN | ${result.message}`);
   } else if (result.war && !result.win) {
     resultTextEl.textContent = "WAR LOSS";
     resultTextEl.className = "result-text result-loss";
-    addLog(`WAR LOSS | ${result.message}`);
   } else if (result.pushed) {
     resultTextEl.textContent = "PUSH";
     resultTextEl.className = "result-text";
-    addLog(`PUSH | ${result.message}`);
   } else if (result.win) {
     resultTextEl.textContent = "WIN";
     resultTextEl.className = "result-text result-win";
-    addLog(`WIN | ${result.message}`);
   } else {
     resultTextEl.textContent = "LOSS";
     resultTextEl.className = "result-text result-loss";
-    addLog(`LOSS | ${result.message}`);
   }
 
-  const anteResult = nextAnteIfNeeded(state);
-  if (anteResult.advanced) {
-    addLog(anteResult.message);
-  }
+  battleSummaryTextEl.textContent = result.message;
+  addLog(result.message);
 
-  const forced = forceDeckCap(state);
-  if (forced.length) {
-    addLog(`Deck cap cleanup: ${forced.map(cardLabel).join(", ")}`);
+  if (result.battleEnded) {
+    addLog(result.battleMessage);
+    battleSummaryTextEl.textContent = result.battleMessage;
+    if (state.shopOpen && state.shopOffers.length === 0) {
+      refreshShopOffers(state);
+    }
   }
 
   renderAll();
-
-  if (state.gameOver) {
-    addLog("Run over. Press Reset Run to start again.");
-  }
 }
 
-function openShop() {
+function handleOpenShop() {
   resultTextEl.textContent = "SHOP OPEN";
   resultTextEl.className = "result-text";
+  battleSummaryTextEl.textContent = "Spend your battle winnings before the next fight.";
+  if (state.shopOffers.length === 0) {
+    const result = refreshShopOffers(state);
+    addLog(`SHOP | ${result.message}`);
+  }
+  renderAll();
+}
+
+function handleNextBattle() {
+  const result = startNextBattle(state);
+  addLog(result.message);
+  resetBoardCards();
+  resultTextEl.textContent = "NEXT BATTLE";
+  resultTextEl.className = "result-text";
+  battleSummaryTextEl.textContent = result.message;
   renderAll();
 }
 
 function handleReset() {
   state = createState();
-  refreshShopOffers(state);
+  startBattle(state);
   resetBoardCards();
-  resultTextEl.textContent = "Press Flip Battle to begin";
+  resultTextEl.textContent = "Press Play Round to begin battle 1";
   resultTextEl.className = "result-text";
+  battleSummaryTextEl.textContent = "Win rounds to steal enemy cards. Win the whole battle to reach the shop.";
   logEl.innerHTML = "";
   addLog("New run started.");
   renderAll();
 }
 
-flipBtn.addEventListener("click", handleBattle);
-shopBtn.addEventListener("click", openShop);
+playRoundBtn.addEventListener("click", handleRound);
+openShopBtn.addEventListener("click", handleOpenShop);
+nextBattleBtn.addEventListener("click", handleNextBattle);
 resetBtn.addEventListener("click", handleReset);
 refreshShopBtn.addEventListener("click", () => {
   const result = refreshShopOffers(state);
@@ -285,15 +287,6 @@ destroyListEl.addEventListener("click", (event) => {
   const id = button.dataset.destroyId;
   const result = destroyCardById(state, id);
   addLog(`DESTROY | ${result.message}`);
-  renderAll();
-});
-
-lootListEl.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-loot-index]");
-  if (!button) return;
-  const index = Number(button.dataset.lootIndex);
-  const result = addLootToDeck(state, index);
-  addLog(`LOOT | ${result.message}`);
   renderAll();
 });
 

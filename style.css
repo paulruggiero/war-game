@@ -120,7 +120,7 @@ button:hover {
 
 /* previous written code, just in case new one is shit */
 
-* {
+** {
   box-sizing: border-box;
 }
 
@@ -164,7 +164,7 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -253,6 +253,10 @@ h1, h2, h3, p {
   font-weight: 800;
 }
 
+.stat-value.small {
+  font-size: 18px;
+}
+
 .table-layout {
   display: grid;
   grid-template-columns: 1.4fr 0.9fr;
@@ -261,7 +265,7 @@ h1, h2, h3, p {
 }
 
 .battle-area {
-  min-height: 420px;
+  min-height: 460px;
   display: grid;
   grid-template-columns: 1fr 0.9fr 1fr;
   gap: 18px;
@@ -332,6 +336,15 @@ h1, h2, h3, p {
   gap: 10px;
 }
 
+.battle-summary {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+}
+
 .sidebar {
   display: grid;
   gap: 20px;
@@ -361,8 +374,7 @@ h1, h2, h3, p {
 
 .deck-list,
 .shop-offers,
-.destroy-list,
-.loot-list {
+.destroy-list {
   display: grid;
   gap: 10px;
 }
